@@ -345,8 +345,15 @@
     // Normally, I'd want to do the username part using a path, but GitHub Pages doesn't support routing via paths
     let queryString = window.location.search;
     let queryParams = new URLSearchParams(queryString);
+    // fill from localStorage if there's no username in url
+    if (localStorage.getItem('twitterUsername') && !queryParams.has('username')) {
+        usernameInput.value = localStorage.getItem('twitterUsername');
+    }
     if (queryParams.has('username')) {
-        usernameInput.value = queryParams.get('username');
+        const username = queryParams.get('username');
+        usernameInput.value = username;
+        // add to localstorage or overwrite on direct page visit
+        localStorage.setItem('twitterUsername', username);
     }
     if (queryParams.has('date')) {
         const [month, day] = getMonthAndDay(queryParams.get('date'));
@@ -392,8 +399,10 @@
      */
     function handleFormSubmit(event) {
         event.preventDefault();
-        window.username = usernameInput.value;
+        window.username = usernameInput.value;        
         window.username = window.username.trim();
+        // set/update username in localStorage
+        localStorage.setItem('twitterUsername', window.username);
         history.pushState({username}, '', `${window.location.pathname}?username=${username}&date=${monthEl.options[monthEl.selectedIndex].textContent}+${dayEl.value}`);
         showLoadingIndicator();
 
